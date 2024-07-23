@@ -1,7 +1,6 @@
 package ex.med.api.controller;
 
 import ex.med.api.domain.PacienteDomain;
-import ex.med.api.medico.DadosAtualizacaoMedico;
 import ex.med.api.paciente.DadosAtualizacaoPaciente;
 import ex.med.api.paciente.DadosCadastroPaciente;
 import ex.med.api.paciente.DadosListagemPaciente;
@@ -39,6 +38,12 @@ public class PacienteController {
 
         return ResponseEntity.ok(page);
 
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity buscarPacientePorId(@PathVariable Long id){
+        var paciente = pacienteRepository.findById(id);
+        return ResponseEntity.ok(paciente);
     }
 
     @PutMapping

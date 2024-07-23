@@ -1,7 +1,6 @@
 package ex.med.api.controller;
 
 import ex.med.api.domain.MedicoDomain;
-
 import ex.med.api.medico.DadosAtualizacaoMedico;
 import ex.med.api.medico.DadosCadastroMedico;
 import ex.med.api.medico.DadosDetalhamentoMedico;
@@ -17,8 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.util.UriComponentsBuilder;
 
-import java.util.List;
-import java.util.Optional;
 
 
 @RestController
