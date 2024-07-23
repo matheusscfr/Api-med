@@ -1,6 +1,7 @@
 package ex.med.api.domain;
 
 import ex.med.api.endereco.Endereco;
+import ex.med.api.paciente.DadosAtualizacaoPaciente;
 import ex.med.api.paciente.DadosCadastroPaciente;
 import jakarta.persistence.*;
 import lombok.*;
@@ -32,5 +33,24 @@ public class PacienteDomain {
         this.cpf = dados.cpf();
         this.endereco = new Endereco((dados.endereco()));
         this.ativo = true;
+    }
+
+    public void atualizarInformacoes(DadosAtualizacaoPaciente dados){
+
+        if(dados.nome() != null){
+            this.nome = dados.nome();
+        }
+
+        if(dados.telefone() != null){
+            this.telefone = dados.telefone();
+        }
+        if(dados.endereco() != null){
+            this.endereco.atualizarInformacoes(dados.endereco());
+        }
+
+    }
+
+    public void excluir(){
+        this.ativo = false;
     }
 }

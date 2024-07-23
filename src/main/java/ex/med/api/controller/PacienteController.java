@@ -1,6 +1,8 @@
 package ex.med.api.controller;
 
 import ex.med.api.domain.PacienteDomain;
+import ex.med.api.medico.DadosAtualizacaoMedico;
+import ex.med.api.paciente.DadosAtualizacaoPaciente;
 import ex.med.api.paciente.DadosCadastroPaciente;
 import ex.med.api.paciente.DadosListagemPaciente;
 import ex.med.api.repository.PacienteRepository;
@@ -37,6 +39,22 @@ public class PacienteController {
 
         return ResponseEntity.ok(page);
 
+    }
+
+    @PutMapping
+    @Transactional
+    public ResponseEntity<String> atualizarMedico(@RequestBody @Valid DadosAtualizacaoPaciente dados){
+        var paciente = pacienteRepository.getReferenceById(dados.id());
+        paciente.atualizarInformacoes(dados);
+        return ResponseEntity.ok("Paciente " + paciente.getNome() + " atualizado com sucesso!");
+    }
+
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<String> excluirPaciente(@PathVariable Long id){
+        var paciente = pacienteRepository.getReferenceById(id);
+        paciente.excluir();
+        return ResponseEntity.ok("Paciente " + paciente.getNome() + " deletado com sucesso!");
     }
 
 
