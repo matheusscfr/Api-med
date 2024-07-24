@@ -1,6 +1,9 @@
 package ex.med.api.controller;
 
 
+import ex.med.api.domain.UsuarioDomain;
+import ex.med.api.security.DadosTokenJWT;
+import ex.med.api.security.TokenService;
 import ex.med.api.usuario.DadosAutenticacao;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,12 +21,15 @@ public class AutenticacaoController {
 
     @Autowired
     private AuthenticationManager manager;
+    @Autowired
+    private TokenService tokenService;
 
     @PostMapping
     public ResponseEntity efetuarAutenticacao(@RequestBody @Valid DadosAutenticacao dados) {
-        var token = new UsernamePasswordAuthenticationToken(dados.login(),dados.senha());
-        var autenticacao =  manager.authenticate(token);
-        return ResponseEntity.ok().build();
+        var authenticationToken = new UsernamePasswordAuthenticationToken(dados.login(),dados.senha());
+        var autenticacao =  manager.authenticate(authenticationToken);
+        var tokenJWT = tokenService.gerarToken((UsuarioDomain) autenticacao.getPrincipal());
+        return ResponseEntity.ok(new DadosTokenJWT(tokenJWT));
 
 
     }
