@@ -26,6 +26,11 @@ public class TratamentoDeErros {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Acesso negado");
     }
 
+    @ExceptionHandler(ValidacaoException.class)
+    public ResponseEntity tratarErroValidacao(ValidacaoException ex){
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
     private record DadosErrosValidacao(String campo, String mensagem){
         public DadosErrosValidacao(FieldError erro){
             this(erro.getField(), erro.getDefaultMessage());
