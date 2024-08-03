@@ -1,10 +1,9 @@
 package ex.med.api.controller;
 
-import ex.med.api.consulta.AgendaDeConsultas;
-import ex.med.api.consulta.DadosAgendamentoConsulta;
-import ex.med.api.consulta.DadosCancelamentoConsulta;
-import ex.med.api.consulta.DadosDetalhamentoConsulta;
+import ex.med.api.Error.ValidacaoException;
+import ex.med.api.consulta.*;
 import ex.med.api.repository.ConsultaRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("consultas")
+@SecurityRequirement(name = "bearer-key")
 public class ConsultaControllerr {
 
     @Autowired
@@ -37,6 +37,16 @@ public class ConsultaControllerr {
         System.out.println(page);
         return ResponseEntity.ok(page);
     }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> atualizarConsulta(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoConsulta dados) {
+        agenda.atulizandoConsulta(id, dados);
+        return ResponseEntity.ok().build();
+    }
+
+
+
 
     @DeleteMapping
     @Transactional

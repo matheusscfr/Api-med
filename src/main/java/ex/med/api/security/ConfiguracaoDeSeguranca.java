@@ -25,7 +25,9 @@ public class ConfiguracaoDeSeguranca {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         return http.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                .and().authorizeRequests().requestMatchers(HttpMethod.POST, "/login").permitAll().anyRequest().authenticated()
+                .and().authorizeRequests().requestMatchers(HttpMethod.POST, "/login").permitAll()
+                .requestMatchers("/v3/api-docs/**", "/swagger-ui.html", "/swagger-ui/**")
+                .permitAll().anyRequest().authenticated()
                 .and().addFilterBefore(filtroDeSeguranca, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }

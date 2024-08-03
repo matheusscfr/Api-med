@@ -5,6 +5,7 @@ import ex.med.api.consulta.validacoes.ValidadorAgendamentoDeConsultas;
 import ex.med.api.consulta.validacoes.cancelamento.ValidadorCancelamentoConsulta;
 import ex.med.api.domain.ConsultaDomain;
 import ex.med.api.domain.MedicoDomain;
+import ex.med.api.domain.PacienteDomain;
 import ex.med.api.repository.ConsultaRepository;
 import ex.med.api.repository.MedicoRepository;
 import ex.med.api.repository.PacienteRepository;
@@ -12,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 
-import java.util.List;
 
 @Service
 public class AgendaDeConsultas {
@@ -61,6 +61,28 @@ public class AgendaDeConsultas {
 
         return medicoRepository.escolherMedicoAleatorioLivreNaData(dados.especialidade(), dados.data());
     }
+
+    public ConsultaDomain atulizandoConsulta(Long id, DadosAtualizacaoConsulta dados) {
+        var consulta = consultaRepository.findById(id)
+                .orElseThrow(() -> new ValidacaoException("Consulta não encontrada"));
+
+        if (dados.idMedico() != null) {
+            MedicoDomain medico = medicoRepository.findById(dados.idMedico())
+                    .orElseThrow(() -> new ValidacaoException("Médico não encontrado"));
+            consulta.setMedico(medico);
+        }
+        if (dados.idPaciente() != null) {
+            PacienteDomain paciente = pacienteRepository.findById(dados.idPaciente())
+                    .orElseThrow(() -> new ValidacaoException("Paciente não encontrado"));
+            consulta.setPaciente(paciente);
+        }
+        if (dados.data() != null) {
+            consulta.setData(dados.data());
+        }
+
+        return consultaRepository.save(consulta);
+    }
+
 
     public void cancelar(DadosCancelamentoConsulta dados){
         if(!consultaRepository.existsById(dados.idConsulta())){

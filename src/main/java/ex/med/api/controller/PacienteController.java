@@ -5,6 +5,7 @@ import ex.med.api.paciente.DadosAtualizacaoPaciente;
 import ex.med.api.paciente.DadosCadastroPaciente;
 import ex.med.api.paciente.DadosListagemPaciente;
 import ex.med.api.repository.PacienteRepository;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 @RestController
 @RequestMapping("pacientes")
+@SecurityRequirement(name = "bearer-key")
 public class PacienteController {
 
     @Autowired
