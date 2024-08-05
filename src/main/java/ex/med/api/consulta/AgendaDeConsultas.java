@@ -62,7 +62,7 @@ public class AgendaDeConsultas {
         return medicoRepository.escolherMedicoAleatorioLivreNaData(dados.especialidade(), dados.data());
     }
 
-    public ConsultaDomain atulizandoConsulta(Long id, DadosAtualizacaoConsulta dados) {
+    public ConsultaDomain atualizandoConsulta(Long id, DadosAtualizacaoConsulta dados) {
         var consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new ValidacaoException("Consulta não encontrada"));
 

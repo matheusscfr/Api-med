@@ -1,6 +1,6 @@
 package ex.med.api.controller;
 
-import ex.med.api.Error.ValidacaoException;
+
 import ex.med.api.consulta.*;
 import ex.med.api.domain.ConsultaDomain;
 import ex.med.api.repository.ConsultaRepository;
@@ -46,7 +46,6 @@ public class ConsultaControllerr {
     @GetMapping
     public ResponseEntity<Page<DadosDetalhamentoConsulta>> listarMedicos(@PageableDefault(size = 10, sort = {"data"})Pageable paginacao){
         var page = consultaRepository.findAllByMotivoIsNull(paginacao);
-        System.out.println(page);
         return ResponseEntity.ok(page);
     }
 
@@ -70,7 +69,7 @@ public class ConsultaControllerr {
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<?> atualizarConsulta(@PathVariable Long id, @RequestBody @Valid DadosAtualizacaoConsulta dados) {
-        agenda.atulizandoConsulta(id, dados);
+        agenda.atualizandoConsulta(id, dados);
         return ResponseEntity.ok().build();
     }
 
