@@ -3,6 +3,7 @@ package ex.med.api.ControllerTest;
 import ex.med.api.Error.ValidacaoException;
 import ex.med.api.consulta.AgendaDeConsultas;
 import ex.med.api.consulta.DadosAgendamentoConsulta;
+import ex.med.api.consulta.DadosAtualizacaoConsulta;
 import ex.med.api.consulta.DadosDetalhamentoConsulta;
 import ex.med.api.consulta.validacoes.ValidadorAgendamentoDeConsultas;
 import ex.med.api.controller.ConsultaControllerr;
@@ -19,16 +20,32 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.*;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.ResultMatcher;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
+import static org.springframework.mock.http.server.reactive.MockServerHttpRequest.put;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.content;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.jsonPath;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@AutoConfigureMockMvc
 public class ConsultaControllerTest {
 
 
@@ -36,7 +53,7 @@ public class ConsultaControllerTest {
     private PacienteRepository pacienteRepository;  // Mock do repositório de pacientes
 
     @Mock
-    private MedicoRepository medicoRepository;  // Mock do repositório de médicos
+    private MedicoRepository medicoRepository;
 
     @Mock
     private ConsultaRepository consultaRepository;
@@ -48,19 +65,24 @@ public class ConsultaControllerTest {
     private List<ValidadorAgendamentoDeConsultas> validadores;
 
     @InjectMocks
-    private ConsultaControllerr controller;  // A classe que está sendo testada
+    private ConsultaControllerr controller;
+
+
+    @Autowired
+    private MockMvc mockMvc;
+
+
     @Test
     void deveAgendarConsultaComSucesso() {
 
-        // Dados para o agendamento
+
         DadosAgendamentoConsulta dadosAgendamento = new DadosAgendamentoConsulta(
-                1L,  // idMedico
-                1L,  // idPaciente
+                1L,
+                1L,
                 LocalDateTime.now().plusDays(1),
                 Especialidade.cardiologia
         );
 
-        // Criando o PacienteDomain com id e outros dados necessários
         PacienteDomain paciente = new PacienteDomain();
         paciente.setId(dadosAgendamento.idPaciente());
         paciente.setNome("Paciente Teste");
@@ -68,7 +90,7 @@ public class ConsultaControllerTest {
         paciente.setTelefone("123456789");
         paciente.setCpf("12345678901");
 
-        // Criando o MedicoDomain com id e outros dados necessários
+
         MedicoDomain medico = new MedicoDomain();
         medico.setId(dadosAgendamento.idMedico());
         medico.setNome("Dr. Teste");
@@ -86,8 +108,7 @@ public class ConsultaControllerTest {
 
 
         DadosDetalhamentoConsulta detalhamentoConsulta = new DadosDetalhamentoConsulta(consulta);
-        lenient().when(agenda.agendar(dadosAgendamento)).thenReturn(detalhamentoConsulta);  // Simulando a chamada ao método de agendamento
-
+        lenient().when(agenda.agendar(dadosAgendamento)).thenReturn(detalhamentoConsulta);
         ResponseEntity<DadosDetalhamentoConsulta> response = controller.agendar(dadosAgendamento);
 
         assertEquals(200, response.getStatusCodeValue());
@@ -100,21 +121,55 @@ public class ConsultaControllerTest {
     }
 
 
-//    @Test
-//    void deveLancarExcecaoQuandoConsultaForMenosDe30MinutosNoFuturo() {
-//        // Configuração: Agendamento para menos de 30 minutos no futuro
-//        DadosAgendamentoConsulta dados = new DadosAgendamentoConsulta(
-//                1L, 1L, LocalDateTime.now().plusMinutes(10), Especialidade.cardiologia
-//        );
-//
-//        // Execução e verificação
-//        ValidacaoException exception = assertThrows(ValidacaoException.class, () -> {
-//            // Passando pelos validadores
-//            validadores.forEach(v -> v.validar(dados));
-//        });
-//
-//        // Verificando a mensagem da exceção
-//        assertEquals("Consulta deve ser agendada com antecedencia de 30 minutos.", exception.getMessage());
-//    }
+    @Test
+    void deveListarConsultasComSucesso() throws Exception {
+
+        List<DadosDetalhamentoConsulta> consultas = List.of(
+                new DadosDetalhamentoConsulta(1L, 12L, 2L, LocalDateTime.of(2024, 8, 31, 17, 0)),
+                new DadosDetalhamentoConsulta(3L, 5L, 2L, LocalDateTime.of(2024, 10, 22, 17, 0))
+        );
+        Page<DadosDetalhamentoConsulta> pagina = new PageImpl<>(consultas);
+
+        // Mock do repositório
+        when(consultaRepository.findAllByMotivoIsNull(any(Pageable.class))).thenReturn(pagina);
+
+        // Execução do teste com MockMvc
+        mockMvc.perform(get("/consultas")
+                        .param("size", "10")
+                        .param("sort", "data,asc"));
+
+    }
+
+
+    @Test
+    void deveAtualizarConsultaComSucesso() throws Exception {
+        // Dados simulados para a atualização da consulta
+        DadosAtualizacaoConsulta dadosAtualizacao = new DadosAtualizacaoConsulta(
+                12L,  // idMedico
+                2L,   // idPaciente
+                LocalDateTime.now().plusDays(1),  // data
+                Especialidade.cardiologia   // especialidade
+        );
+
+        // Simulação da chamada ao método da agenda
+        doNothing().when(agenda).atualizandoConsulta(eq(1L), eq(dadosAtualizacao));
+
+        // Execução do teste
+        mockMvc.perform(put("/consultas/{id}", 1L)
+                        .contentType("application/json")
+                        .content("{"
+                                + "\"idMedico\":12,"
+                                + "\"idPaciente\":2,"
+                                + "\"data\":\"2024-12-04T10:00:00\","
+                                + "\"especialidade\":\"cardiologia\""
+                                + "}"))
+                .andExpect(status().isOk())
+                .andExpect(content().string(""));
+
+        verify(agenda, times(1)).atualizandoConsulta(eq(1L), eq(dadosAtualizacao));
+    }
+
+
+
 
 }
