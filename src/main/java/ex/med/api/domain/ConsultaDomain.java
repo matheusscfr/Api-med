@@ -14,6 +14,7 @@ import java.util.Optional;
 @Entity(name = "consulta")
 @Getter
 @Setter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")

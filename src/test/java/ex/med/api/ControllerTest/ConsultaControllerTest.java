@@ -15,6 +15,7 @@ import ex.med.api.repository.ConsultaRepository;
 import ex.med.api.repository.MedicoRepository;
 import ex.med.api.repository.PacienteRepository;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -28,9 +29,12 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import static org.hamcrest.collection.IsCollectionWithSize.hasSize;
 import static org.junit.jupiter.api.Assertions.*;
@@ -70,6 +74,11 @@ public class ConsultaControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    @BeforeEach
+    void setup() {
+        mockMvc = MockMvcBuilders.standaloneSetup(controller).build();
+    }
 
 
     @Test
@@ -124,52 +133,86 @@ public class ConsultaControllerTest {
     @Test
     void deveListarConsultasComSucesso() throws Exception {
 
+        PageRequest paginacao = PageRequest.of(0, 10);
+
         List<DadosDetalhamentoConsulta> consultas = List.of(
                 new DadosDetalhamentoConsulta(1L, 12L, 2L, LocalDateTime.of(2024, 8, 31, 17, 0)),
                 new DadosDetalhamentoConsulta(3L, 5L, 2L, LocalDateTime.of(2024, 10, 22, 17, 0))
         );
-        Page<DadosDetalhamentoConsulta> pagina = new PageImpl<>(consultas);
+        Page<DadosDetalhamentoConsulta> consultaPage = new PageImpl<>(consultas, paginacao, consultas.size());
 
-        // Mock do repositório
-        when(consultaRepository.findAllByMotivoIsNull(any(Pageable.class))).thenReturn(pagina);
 
-        // Execução do teste com MockMvc
-        mockMvc.perform(get("/consultas")
-                        .param("size", "10")
-                        .param("sort", "data,asc"));
+        when(consultaRepository.findAllByMotivoIsNull(paginacao)).thenReturn(consultaPage);
 
+        ResponseEntity<Page<DadosDetalhamentoConsulta>> response = controller.listarMedicos(paginacao);
+
+
+        assertEquals(200, response.getStatusCodeValue());
+        assertNotNull(response.getBody());
+        assertEquals(2, response.getBody().getContent().size());
+
+
+        DadosDetalhamentoConsulta primeiraConsulta = response.getBody().getContent().get(0);
+        assertEquals(1L, primeiraConsulta.id());
+        assertEquals(12L, primeiraConsulta.idMedico());
+        assertEquals(2L, primeiraConsulta.idPaciente());
+        assertEquals(LocalDateTime.of(2024, 8, 31, 17, 0), primeiraConsulta.data());
+
+
+        verify(consultaRepository, times(1)).findAllByMotivoIsNull(paginacao);
     }
-
 
     @Test
     void deveAtualizarConsultaComSucesso() throws Exception {
-        // Dados simulados para a atualização da consulta
+
+        MedicoDomain medico = MedicoDomain.builder()
+                .id(12L)
+                .nome("Dr. House")
+                .email("dr.house@example.com")
+                .crm("12345")
+                .telefone("123456789")
+                .especialidade(Especialidade.cardiologia)
+                .ativo(true)
+                .build();
+
+        PacienteDomain paciente = PacienteDomain.builder()
+                .id(2L)
+                .nome("John Doe")
+                .email("johndoe@example.com")
+                .telefone("987654321")
+                .cpf("12345678900")
+                .ativo(true)
+                .build();
+
+
         DadosAtualizacaoConsulta dadosAtualizacao = new DadosAtualizacaoConsulta(
-                12L,  // idMedico
-                2L,   // idPaciente
-                LocalDateTime.now().plusDays(1),  // data
-                Especialidade.cardiologia   // especialidade
+                12L,
+                2L,
+                LocalDateTime.now().plusDays(1),
+                Especialidade.cardiologia
         );
 
-        // Simulação da chamada ao método da agenda
-        doNothing().when(agenda).atualizandoConsulta(eq(1L), eq(dadosAtualizacao));
+        ConsultaDomain consulta = ConsultaDomain.builder()
+                .id(1L)
+                .medico(medico)
+                .paciente(paciente)
+                .data(LocalDateTime.now().plusDays(1))
+                .build();
 
-        // Execução do teste
-        mockMvc.perform(put("/consultas/{id}", 1L)
-                        .contentType("application/json")
-                        .content("{"
-                                + "\"idMedico\":12,"
-                                + "\"idPaciente\":2,"
-                                + "\"data\":\"2024-12-04T10:00:00\","
-                                + "\"especialidade\":\"cardiologia\""
-                                + "}"))
-                .andExpect(status().isOk())
-                .andExpect(content().string(""));
 
-        verify(agenda, times(1)).atualizandoConsulta(eq(1L), eq(dadosAtualizacao));
+        mockMvc.perform(
+                        MockMvcRequestBuilders.put("/consultas/{id}", 1L)
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content("{"
+                                        + "\"idMedico\":12,"
+                                        + "\"idPaciente\":2,"
+                                        + "\"data\":\"2024-12-04T10:00:00\","
+                                        + "\"especialidade\":\"cardiologia\""
+                                        + "}")
+                )
+                .andExpect(status().isOk());
+
+        verify(agenda, times(1)).atualizandoConsulta(eq(1L), any(DadosAtualizacaoConsulta.class));
     }
-
-
-
 
 }
