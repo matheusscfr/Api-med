@@ -12,6 +12,7 @@ import java.util.List;
 
 @Service
 public class PlanilhaService {
+    
     public ByteArrayInputStream gerarPlanilha(List<ConsultaDomain> consultas) throws IOException {
     try (Workbook workbook = new XSSFWorkbook(); ByteArrayOutputStream out = new ByteArrayOutputStream()) {
 

@@ -21,8 +21,12 @@ import org.springframework.web.util.UriComponentsBuilder;
 @SecurityRequirement(name = "bearer-key")
 public class PacienteController {
 
-    @Autowired
-    private PacienteRepository pacienteRepository;
+
+    private final PacienteRepository pacienteRepository;
+
+    public PacienteController(PacienteRepository pacienteRepository) {
+        this.pacienteRepository = pacienteRepository;
+    }
 
     @PostMapping
     @Transactional

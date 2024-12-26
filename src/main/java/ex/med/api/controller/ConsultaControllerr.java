@@ -26,15 +26,18 @@ import java.util.List;
 @SecurityRequirement(name = "bearer-key")
 public class ConsultaControllerr {
 
-    @Autowired
-    private AgendaDeConsultas agenda;
 
-    @Autowired
-    private ConsultaRepository consultaRepository;
+    private final AgendaDeConsultas agenda;
 
-    @Autowired
-    private PlanilhaService planilhaService;
+    private final ConsultaRepository consultaRepository;
 
+    private final PlanilhaService planilhaService;
+
+    public ConsultaControllerr(AgendaDeConsultas agenda, ConsultaRepository consultaRepository, PlanilhaService planilhaService) {
+        this.agenda = agenda;
+        this.consultaRepository = consultaRepository;
+        this.planilhaService = planilhaService;
+    }
 
     @PostMapping
     @Transactional

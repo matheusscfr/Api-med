@@ -16,18 +16,23 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class AgendaDeConsultas {
-    @Autowired
-    private ConsultaRepository consultaRepository;
 
-    @Autowired
-    private MedicoRepository medicoRepository;
 
-    @Autowired
-    private PacienteRepository pacienteRepository;
+    private final ConsultaRepository consultaRepository;
 
-    @Autowired
-    private List<ValidadorAgendamentoDeConsultas> validadores;
+    private final MedicoRepository medicoRepository;
 
+    private final PacienteRepository pacienteRepository;
+
+    private final List<ValidadorAgendamentoDeConsultas> validadores;
+
+
+    public AgendaDeConsultas(ConsultaRepository consultaRepository, MedicoRepository medicoRepository, List<ValidadorAgendamentoDeConsultas> validadores, PacienteRepository pacienteRepository ){
+        this.consultaRepository = consultaRepository;
+        this.medicoRepository = medicoRepository;
+        this.validadores = validadores;
+        this.pacienteRepository = pacienteRepository;
+    }
 
 
     public DadosDetalhamentoConsulta agendar(DadosAgendamentoConsulta dados){
@@ -81,6 +86,10 @@ public class AgendaDeConsultas {
         }
 
         return consultaRepository.save(consulta);
+    }
+
+    public void atualizar(){
+
     }
 
 

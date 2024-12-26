@@ -24,12 +24,14 @@ import java.util.List;
 @SecurityRequirement(name = "bearer-key")
 public class FeedbackController {
 
-    @Autowired
-    private FeedbackService feedbackService;
+    private final FeedbackService feedbackService;
 
-    @Autowired
-    private FeedbackRepository feedbackRepository;
+    private final FeedbackRepository feedbackRepository;
 
+    public FeedbackController(FeedbackService feedbackService, FeedbackRepository feedbackRepository) {
+        this.feedbackService = feedbackService;
+        this.feedbackRepository = feedbackRepository;
+    }
 
     @PostMapping
     @Transactional
