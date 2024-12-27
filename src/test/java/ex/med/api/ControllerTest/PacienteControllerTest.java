@@ -148,7 +148,7 @@ public class PacienteControllerTest {
         when(pacienteRepository.getReferenceById(dadosAtualizacao.id())).thenReturn(paciente);
 
         // Chama o método para testar
-        ResponseEntity<String> response = controller.atualizarMedico(dadosAtualizacao);
+        ResponseEntity<String> response = controller.atualizarPaciente(dadosAtualizacao);
 
         assertEquals(200, response.getStatusCodeValue());
         assertEquals("Paciente Carlos Souza atualizado com sucesso!", response.getBody());

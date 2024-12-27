@@ -2,6 +2,7 @@ package ex.med.api.controller;
 
 
 import ex.med.api.consulta.*;
+import ex.med.api.consulta.prescricao.Prescricao;
 import ex.med.api.domain.ConsultaDomain;
 import ex.med.api.repository.ConsultaRepository;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -29,12 +30,15 @@ public class ConsultaControllerr {
 
     private final AgendaDeConsultas agenda;
 
+    private final Prescricao prescricao;
+
     private final ConsultaRepository consultaRepository;
 
     private final PlanilhaService planilhaService;
 
-    public ConsultaControllerr(AgendaDeConsultas agenda, ConsultaRepository consultaRepository, PlanilhaService planilhaService) {
+    public ConsultaControllerr(AgendaDeConsultas agenda, ConsultaRepository consultaRepository, PlanilhaService planilhaService, Prescricao prescricao) {
         this.agenda = agenda;
+        this.prescricao = prescricao;
         this.consultaRepository = consultaRepository;
         this.planilhaService = planilhaService;
     }
@@ -44,6 +48,13 @@ public class ConsultaControllerr {
     public ResponseEntity agendar(@RequestBody @Valid DadosAgendamentoConsulta dados){
         var dto = agenda.agendar(dados);
         return ResponseEntity.ok(dto);
+    }
+
+    @PostMapping(value = "prescricao")
+    @Transactional
+    public ResponseEntity cadastrarPrescricao(@RequestBody @Valid DadosPrescricaoConsulta dados){
+        prescricao.salvarPrescricao(dados);
+        return ResponseEntity.ok("Prescricao cadastrado com sucesso");
     }
 
     @GetMapping
@@ -58,7 +69,6 @@ public class ConsultaControllerr {
         List<ConsultaDomain> consultas = consultaRepository.findAll();
         ByteArrayInputStream in = planilhaService.gerarPlanilha(consultas);
 
-        // Cria um array de bytes a partir do ByteArrayInputStream
         byte[] bytes = in.readAllBytes();
 
         HttpHeaders headers = new HttpHeaders();

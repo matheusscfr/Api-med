@@ -71,6 +71,14 @@ public class AgendaDeConsultas {
         var consulta = consultaRepository.findById(id)
                 .orElseThrow(() -> new ValidacaoException("Consulta não encontrada"));
 
+        DadosAgendamentoConsulta dadosAgendamentoConsulta = new DadosAgendamentoConsulta(
+                dados.idMedico(),
+                dados.idPaciente(),
+                dados.data(),
+                dados.especialidade()
+        );
+        validadores.forEach(v -> v.validar(dadosAgendamentoConsulta));
+
         if (dados.idMedico() != null) {
             MedicoDomain medico = medicoRepository.findById(dados.idMedico())
                     .orElseThrow(() -> new ValidacaoException("Médico não encontrado"));
@@ -88,9 +96,6 @@ public class AgendaDeConsultas {
         return consultaRepository.save(consulta);
     }
 
-    public void atualizar(){
-
-    }
 
 
     public void cancelar(DadosCancelamentoConsulta dados){

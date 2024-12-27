@@ -16,6 +16,7 @@ public class TratamentoDeErros {
     public ResponseEntity tratarError408(){
         return ResponseEntity.notFound().build();
     }
+
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity tratarError400(MethodArgumentNotValidException ex){
         var erros = ex.getFieldErrors();

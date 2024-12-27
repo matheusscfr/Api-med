@@ -17,15 +17,12 @@ import java.io.IOException;
 @Component
 public class  FiltroDeSeguranca extends OncePerRequestFilter {
 
+    @Autowired
+    private  TokenService tokenService;
 
-    private final TokenService tokenService;
+    @Autowired
+    private  UsuarioRepository repository;
 
-    private final UsuarioRepository repository;
-
-    public FiltroDeSeguranca(TokenService tokenService, UsuarioRepository repository) {
-        this.tokenService = tokenService;
-        this.repository = repository;
-    }
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {

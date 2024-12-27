@@ -54,7 +54,7 @@ public class PacienteController {
 
     @PutMapping
     @Transactional
-    public ResponseEntity<String> atualizarMedico(@RequestBody @Valid DadosAtualizacaoPaciente dados){
+    public ResponseEntity<String> atualizarPaciente(@RequestBody @Valid DadosAtualizacaoPaciente dados){
         var paciente = pacienteRepository.getReferenceById(dados.id());
         paciente.atualizarInformacoes(dados);
         return ResponseEntity.ok("Paciente " + paciente.getNome() + " atualizado com sucesso!");
